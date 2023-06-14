@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Grid, Card, Text, useTheme, Input, Button } from "@nextui-org/react";
 import { ToastContainer, toast } from "react-toastify";
+import {Authentication } from "../api/http/todosRequest";
 
 const Login = () => {
   const { type, theme } = useTheme();
@@ -17,10 +18,38 @@ const Login = () => {
         password,
       };
       if(user.userName.trim().length >2 && user.password.trim().length > 2) {
-        localStorage.setItem("token",JSON.stringify(user))
-         window.location.reload()
+         Authentication(user.userName,user.password)
+         .then(response => {
+          console.log(response.data);
+
+          if(response.data.code==400){
+            console.log("Authentication Unsuccessfull");
+            notify("Username/Password doesn't correct")
+          }
+          if(response.data.code ==200 && response.data.status=="success"){
+           
+            const accessToken = response.data.results.token;
+            const companyId = response.data.results.company_id;
+            const userId = response.data.results.user_id;
+              // Use the obtained accessToken, companyId, and userId as needed
+              console.log('Access Token:', accessToken);
+              console.log('Company ID:', companyId);
+              console.log('User ID:', userId);
+            
+            console.log("Authentication sucessfull")
+            localStorage.setItem("token",JSON.stringify(user))
+            localStorage.setItem("accessToken",accessToken)
+            localStorage.setItem("companyId",companyId)
+            localStorage.setItem("userId",userId)
+               window.location.reload()
+           }
+        })
+        .catch(error => {
+          console.error(error);
+        });
+ 
       }else {
-        notify("Username/Password length min 3 characters")
+        notify("Username/Password doesn't correct")
       } 
   };
 
@@ -80,11 +109,14 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
-            <Button flat auto rounded color="neutral" onClick={handleLogin}>
+            <Button  
+            auto rounded  shadow color="default" onClick={handleLogin} 
+            >
               <Text
-                color={theme.colors.accents5.value}
+                color="white"
                 weight="bold"
                 transform="uppercase"
+                
               >
                 Login
               </Text>

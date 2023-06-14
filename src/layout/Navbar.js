@@ -52,7 +52,7 @@ const NavbarComponent = () => {
             }}
           >
             <Avatar
-              text={token[0].userName.length > 0 ? token[0].userName.trim().split("")[0] : "?"}
+              text={token[0].userName.length > 0 ? token[0].userName.trim().split("@")[0] : "?"}
               size="md"
               color="gradient"
               textColor="white"
@@ -63,7 +63,7 @@ const NavbarComponent = () => {
                 fontWeight: "$bold",
               }}
             >
-              {token[0].userName}
+              {token[0].userName.split("@")[0]}
             </Text>
             <Tooltip content="Logout" color="primary">
               <Button

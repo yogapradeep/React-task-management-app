@@ -1,6 +1,7 @@
 import { Box } from "../components/Box";
 import Navbar from "./Navbar";
 
+
 export const Layout = ({ children }) => (
   <Box
     css={{
@@ -8,6 +9,8 @@ export const Layout = ({ children }) => (
     }}
   >
     <Navbar />
-    {children}
+    
+      {children}
+    
   </Box>
 );

@@ -6,7 +6,9 @@ import useDarkMode from "use-dark-mode";
 import { Layout } from "./layout";
 import { Box } from "./components/Box";
 import TodoList from "./components/TodoList";
+
 const Login = React.lazy(() => import("./views/Login")); // Lazy-loaded
+
 
 
 
@@ -35,12 +37,9 @@ const App = () => {
   
   }, []);
 
-  // const query = {
-  //   content : "update",
-  //   isCompleted:true
-  // }
+  
 
-  // !!!! user için obje kontrolü yapıcaz
+  
   return (
     <NextUIProvider theme={darkMode.value ? darkTheme : lightTheme}>
       {user.length > 0 && user[0] !== undefined ? (
