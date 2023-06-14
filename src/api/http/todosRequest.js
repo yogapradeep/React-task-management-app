@@ -34,7 +34,7 @@ const Authentication = (email, password) => {
 const commonheaders = {
   'Authorization': `Bearer ${accessToken}`,
   'Accept': 'application/json',
-  'Content-Type': 'application/json',
+  'Content-Type': 'application/json', 
 };
 
 const TeamApi = () => {

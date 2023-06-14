@@ -1,27 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  Card,
-  Col,
-  Row,
-  Tooltip,
   Text,
-  Badge,
   Modal,
-  Input,
-  Button,
-  Radio,
-  Container,
   Dropdown
 } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import { DeleteTodo, GetTodos, UpdateTodo, TeamApi } from "../api/http/todosRequest";
-import { DeleteIcon } from "./icons/deleteIcon";
-import { IconButton } from "./icons/IconButton";
-import { EditIcon } from "./icons/editIcon";
-import { EyeIcon } from "./icons/eyeIcon";
+
+import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, List, Image, } from 'semantic-ui-react'
 
 const TodoCard = ({ item, setTodos, setLoading }) => {
- 
+
   const [task_msg, setTask_msg] = useState(item.task_msg);
   const [task_date, setTask_date] = useState(item.task_date);
   const [completed, setCompleted] = useState(0);
@@ -43,19 +32,19 @@ const TodoCard = ({ item, setTodos, setLoading }) => {
 
   }, []);
 
- 
- 
+
+
 
 
   //  Date & Time Manipulation
 
   // Split the date string into year, month, and day components
-const [year, month, day] = item.task_date.split('-');
+  const [year, month, day] = item.task_date.split('-');
 
-// Rearrange the components in the desired format
-const formattedDate = `${day}-${month}-${year}`;
+  // Rearrange the components in the desired format
+  const formattedDate = `${day}-${month}-${year}`;
 
-// console.log(formattedDate); // Output: 01-06-2023
+  // console.log(formattedDate); // Output: 01-06-2023
 
 
   const hours = Math.floor(item.task_time / 3600);
@@ -97,7 +86,7 @@ const formattedDate = `${day}-${month}-${year}`;
   const closeHandler = () => {
     setVisible(false);
   };
-  
+
 
   const notify = (proccess) => toast(proccess);
 
@@ -109,13 +98,13 @@ const formattedDate = `${day}-${month}-${year}`;
         notify("Deleting")
         GetTodos().then((res) => setTodos(res.data.results));
         notify("Deleted");
-    })
+      })
       .catch((err) => {
         notify("Upss somethings went wrong")
       })
       .finally(() => {
-       
-       
+
+
       });
     setLoading(false);
   };
@@ -188,7 +177,7 @@ const formattedDate = `${day}-${month}-${year}`;
 
       })
       .finally(() => {
-       
+
       });
 
     setVisible(false);
@@ -200,45 +189,38 @@ const formattedDate = `${day}-${month}-${year}`;
   return (
     <>
       {/* Task Card */}
-      <Card  css={{
-        width: 450,
-        height: 120,
-        m: 20,
-      }}>
-        <Card.Body css={{
-          pt: 20,
-        }}>
 
-          <Row justify="space-between">
-            <Col>
-              <Text h3>{item.task_msg}</Text>
-              <Text h5>{formattedDate} at {formattedTime}</Text>
-            </Col>
 
-            {/* <Text h5>Date,Time, Zone format to API</Text>
+      {/* <Image avatar src='https://react.semantic-ui.com/images/avatar/small/rachel.png' /> */}
+        {/* <List.Header as='a'>{item.task_msg}</List.Header> */}
+      {/* <List.Item>
+      <List.Content>
+        <List.Description>
+        <Text h3>{item.task_msg}</Text>
+        <Text h5>{formattedDate} at {formattedTime}</Text>
+        <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
+        <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
+        </List.Description>
+      </List.Content>
+    </List.Item> */}
+
+      <Segment padded key={item.id} style={{display: "flex", }}>
+        <div style={{flex: "1 1 auto"}} >
+        <Header style={{margin: 0 + 'px'}} size='medium'>{item.task_msg}</Header>
+        <Header style={{margin: 0 + 'px'}} size='tiny'>{formattedDate} at {formattedTime}</Header>
+        </div>
+      <div floated="right">
+      <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
+        <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
+      </div>
+       
+        
+      </Segment>
+      {/* <Text h5>Date,Time, Zone format to API</Text>
       <Text h5>{item.task_date}</Text>
       <Text h6>{item.task_time}</Text>
       <Text h6>{item.time_zone}</Text> */}
 
-            <Row justify="flex-end">
-              <Tooltip content="Edit Task">
-                <IconButton onClick={handler}>
-                  <EditIcon size={30} fill="#16181A" />
-                </IconButton>
-              </Tooltip>
-            </Row>
-
-            <Tooltip content="Do Completed" >
-              <IconButton
-                css={{ ml: "20px" }}
-                onClick={() => handleSetCompleted(item.id)}
-              >
-                <EyeIcon size={30} fill="#16181A" />
-              </IconButton>
-            </Tooltip>
-          </Row>
-        </Card.Body>
-      </Card>
 
 
       {/* Update Modal */}
@@ -255,56 +237,50 @@ const formattedDate = `${day}-${month}-${year}`;
           </Text>
         </Modal.Header>
         <Modal.Body>
-          <Input
-            clearable
-            label="Task Description"
-            value={task_msg}
-            onChange={(e) => setTask_msg(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
+        <Form>
+              <Form.Field>
+                <label>Task Description</label>
+                <input value={task_msg}  onChange={(e) => setTask_msg(e.target.value)}
+                  onKeyDown={handleKeyDown} />
+              </Form.Field>
 
-          <Row justify="space-between">
-            <Input
-              width="45%"
-              label="Date"
-              type="date"
-              value={task_date}
-              onChange={(event) => {
-                const newDate = event.target.value;
-                const formattedDate = new Date(newDate).toISOString().split("T")[0];
-                console.log("selected date", newDate);
-                console.log("formated date", formattedDate);
-                setTask_date(formattedDate)
-              }}
-            />
-            <Input
-              width="45%"
-              label="Time"
-              type="time"
-              id="time" step="1800" min="00:00" max="23:59"
-              name="time" value={task_time}
-              onChange={(event) => {
-                const newTime = event.target.value;
-                console.log(newTime);
-                setTask_time(newTime);
-              }}
-            />
-          </Row>
+              <Form.Group widths='equal'>
+                <Form.Input type="date" value={task_date} fluid label='Date' icon='calendar alternate outline' iconPosition='left'
+                  onChange={(event) => {
+                    const newDate = event.target.value;
+                    const formattedDate = new Date(newDate).toISOString().split("T")[0];
+                    console.log("selected date", newDate);
+                    console.log("formated date", formattedDate);
+                    setTask_date(formattedDate)
+                  }}
 
-          <Row justify="space-between">
-            <Radio.Group
-              onChange={(e) => {
-                setCompleted(e);
-              }}
-              label="Status"
-              defaultValue={item.is_completed}
-            >
-              <Radio value={1}>Completed</Radio>
-              <Radio value={0}>Not Completed</Radio>
-            </Radio.Group>
-          </Row>
+                />
+                <Form.Input icon="clock outline" iconPosition='left' type="time" name="time" label='Time' placeholder='Time' fluid 
+                 value={task_time}
+                 onChange={(event) => {
+                   const newTime = event.target.value;
+                   console.log(newTime);
+                   setTask_time(newTime);
+                 }}
+                 
+                />
+              </Form.Group>
+              <Form.Group >
+             
+            <Popup inverted content='Delete Task' trigger={<Button basic icon='trash alternate outline' onClick={() => handleDeleteTodo(item.id)} />} />
 
-          <Dropdown>
+              <Button auto flat  color="error" onClick={closeHandler}>
+                Cancel
+              </Button>
+
+              <Button  floated="right" onClick={() => handleUpdateTodo(item.id)} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
+                Save
+              </Button>
+              </Form.Group>
+
+            </Form>
+         
+          {/* <Dropdown>
             <Dropdown.Button flat>{selectedValue}</Dropdown.Button>
             <Dropdown.Menu aria-label="Single selection actions"
               color="secondary"
@@ -321,25 +297,10 @@ const formattedDate = `${day}-${month}-${year}`;
                 </Dropdown.Item>
               )}
             </Dropdown.Menu>
-          </Dropdown>
+          </Dropdown> */}
 
         </Modal.Body>
         <Modal.Footer>
-
-          <Row justify="space-between">
-
-            <IconButton onClick={() => handleDeleteTodo(item.id)}>
-              <DeleteIcon size={30} fill="#FF0080" />
-            </IconButton>
-            <Row justify="flex-end">
-              <Button  auto flat color="error" onPress={closeHandler}>
-                Close
-              </Button>
-              <Button css={{ ml: "20px" }} auto onPress={() => handleUpdateTodo(item.id)}>
-                Save
-              </Button>
-            </Row>
-          </Row>
         </Modal.Footer>
       </Modal>
     </>
