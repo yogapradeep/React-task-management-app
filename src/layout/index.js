@@ -8,7 +8,7 @@ export const Layout = ({ children }) => (
       maxW: "100%"
     }}
   >
-    <Navbar />
+    {/* <Navbar /> */}
     
       {children}
     
