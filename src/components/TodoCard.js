@@ -9,7 +9,7 @@ import { DeleteTodo, GetTodos, UpdateTodo, TeamApi } from "../api/http/todosRequ
 
 import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, List, Image, } from 'semantic-ui-react'
 
-const TodoCard = ({ item, setTodos, setLoading }) => {
+const TodoCard = ({ item, setTodos, setLoading, }) => {
 
   const [task_msg, setTask_msg] = useState(item.task_msg);
   const [task_date, setTask_date] = useState(item.task_date);
@@ -192,7 +192,7 @@ const TodoCard = ({ item, setTodos, setLoading }) => {
 
 
       {/* <Image avatar src='https://react.semantic-ui.com/images/avatar/small/rachel.png' /> */}
-        {/* <List.Header as='a'>{item.task_msg}</List.Header> */}
+      {/* <List.Header as='a'>{item.task_msg}</List.Header> */}
       {/* <List.Item>
       <List.Content>
         <List.Description>
@@ -204,17 +204,17 @@ const TodoCard = ({ item, setTodos, setLoading }) => {
       </List.Content>
     </List.Item> */}
 
-      <Segment padded key={item.id} style={{display: "flex", }}>
-        <div style={{flex: "1 1 auto"}} >
-        <Header style={{margin: 0 + 'px'}} size='medium'>{item.task_msg}</Header>
-        <Header style={{margin: 0 + 'px'}} size='tiny'>{formattedDate} at {formattedTime}</Header>
+      <Segment padded key={item.id} style={{ display: "flex", }}>
+        <div style={{ flex: "1 1 auto" }} >
+          <Header style={{ margin: 0 + 'px' }} size='medium'>{item.task_msg}</Header>
+          <Header style={{ margin: 0 + 'px' }} size='tiny'>{formattedDate} at {formattedTime}</Header>
         </div>
-      <div floated="right">
-      <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
-        <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
-      </div>
-       
-        
+        <div floated="right">
+          <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
+          <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
+        </div>
+
+
       </Segment>
       {/* <Text h5>Date,Time, Zone format to API</Text>
       <Text h5>{item.task_date}</Text>
@@ -237,68 +237,68 @@ const TodoCard = ({ item, setTodos, setLoading }) => {
           </Text>
         </Modal.Header>
         <Modal.Body>
-        <Form>
-              <Form.Field>
-                <label>Task Description</label>
-                <input value={task_msg}  onChange={(e) => setTask_msg(e.target.value)}
-                  onKeyDown={handleKeyDown} />
-              </Form.Field>
+          <Form>
+            <Form.Field>
+              <label>Task Description</label>
+              <input value={task_msg} onChange={(e) => setTask_msg(e.target.value)}
+                onKeyDown={handleKeyDown} />
+            </Form.Field>
 
-              <Form.Group widths='equal'>
-                <Form.Input type="date" value={task_date} fluid label='Date' icon='calendar alternate outline' iconPosition='left'
-                  onChange={(event) => {
-                    const newDate = event.target.value;
-                    const formattedDate = new Date(newDate).toISOString().split("T")[0];
-                    console.log("selected date", newDate);
-                    console.log("formated date", formattedDate);
-                    setTask_date(formattedDate)
-                  }}
+            <Form.Group widths='equal'>
+              <Form.Input type="date" value={task_date} fluid label='Date' icon='calendar alternate outline' iconPosition='left'
+                onChange={(event) => {
+                  const newDate = event.target.value;
+                  const formattedDate = new Date(newDate).toISOString().split("T")[0];
+                  console.log("selected date", newDate);
+                  console.log("formated date", formattedDate);
+                  setTask_date(formattedDate)
+                }}
 
-                />
-                <Form.Input icon="clock outline" iconPosition='left' type="time" name="time" label='Time' placeholder='Time' fluid 
-                 value={task_time}
-                 onChange={(event) => {
-                   const newTime = event.target.value;
-                   console.log(newTime);
-                   setTask_time(newTime);
-                 }}
-                 
-                />
-              </Form.Group>
-              <Form.Group >
-             
-            <Popup inverted content='Delete Task' trigger={<Button basic icon='trash alternate outline' onClick={() => handleDeleteTodo(item.id)} />} />
+              />
+              <Form.Input icon="clock outline" iconPosition='left' type="time" name="time" label='Time' placeholder='Time' fluid
+                value={task_time}
+                onChange={(event) => {
+                  const newTime = event.target.value;
+                  console.log(newTime);
+                  setTask_time(newTime);
+                }}
 
-              <Button auto flat  color="error" onClick={closeHandler}>
+              />
+            </Form.Group>
+            <Form.Field>
+              <label>Assign User</label>
+              <Dropdown >
+                <Dropdown.Button css={{ m: 20, justifyContent: "center" }} flat>{selectedValue}</Dropdown.Button>
+                <Dropdown.Menu aria-label="Single selection actions"
+                  color="secondary"
+                  disallowEmptySelection
+                  selectionMode="single"
+                  selectedKeys={UserSelected}
+                  onSelectionChange={setUserSelected}
+                  items={users}
+                >
+                  {(item) => (
+                    <Dropdown.Item key={item.id} >
+                      {item.name}
+                    </Dropdown.Item>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Form.Field>
+
+            <Form.Group >
+              <Popup inverted content='Delete Task' trigger={<Button basic icon='trash alternate outline' onClick={() => handleDeleteTodo(item.id)} />} />
+
+              <Button auto flat color="error" onClick={closeHandler}>
                 Cancel
               </Button>
 
-              <Button  floated="right" onClick={() => handleUpdateTodo(item.id)} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
+              <Button floated="right" onClick={() => handleUpdateTodo(item.id)} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
                 Save
               </Button>
-              </Form.Group>
+            </Form.Group>
 
-            </Form>
-         
-          {/* <Dropdown>
-            <Dropdown.Button flat>{selectedValue}</Dropdown.Button>
-            <Dropdown.Menu aria-label="Single selection actions"
-              color="secondary"
-              disallowEmptySelection
-              selectionMode="single"
-              selectedKeys={UserSelected}
-              value={item.assigned_user}
-              onSelectionChange={setUserSelected}
-              items={users}
-            >
-              {(item) => (
-                <Dropdown.Item key={item.id} >
-                  {item.name}
-                </Dropdown.Item>
-              )}
-            </Dropdown.Menu>
-          </Dropdown> */}
-
+          </Form>
         </Modal.Body>
         <Modal.Footer>
         </Modal.Footer>

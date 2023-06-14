@@ -34,12 +34,13 @@ const TodoList = () => {
   );
 
   useEffect(() => {
-    // TeamApi().then((res) => {
-    //   setUsers(res.data.results.data);
+    TeamApi().then((res) => {
+      console.log("user data:", res.data);
+      setUsers(res.data.results.data);
 
-    // }).catch((err) => {
-    //   console.log(err);
-    // });
+    }).catch((err) => {
+      console.log(err);
+    });
 
     GetTodos()
       .then((res) => {
@@ -50,7 +51,7 @@ const TodoList = () => {
       });
 
 
-  }, [todos]);
+  }, []);
 
 
   // TO close Modal
@@ -85,7 +86,7 @@ const TodoList = () => {
       const timezoneOffsetInSeconds = Math.abs(currentDate.getTimezoneOffset() * 60);
       // console.log(timezoneOffsetInSeconds);
 
-      AddTodo({ assigned_user: "user_8c2ff2128e70493fa4cedd2cab97c492", task_date: task_date, task_time: timeInSeconds, time_zone: timezoneOffsetInSeconds, is_completed: 0, task_msg: task_msg })
+      AddTodo({ assigned_user: selectedValue[0], task_date: task_date, task_time: timeInSeconds, time_zone: timezoneOffsetInSeconds, is_completed: 0, task_msg: task_msg })
         .then((res) => {
           console.log("Response data while adding:", res.data);
           if (res.data.code === 400 || res.data.status === "error") {
@@ -196,59 +197,10 @@ const TodoList = () => {
                 />
               </Form.Group>
 
-              <Button auto flat color="error" onClick={closeHandler}>
-                Cancel
-              </Button>
-
-              <Button floated="right" onClick={handleAddTodo} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
-                Save
-              </Button>
-
-            </Form>
-
-            {/* <Header size='medium'>Task Description</Header>
-            <Input
-              value={task_msg}
-              onChange={(e) => setTask_msg(e.target.value)}
-              onKeyDown={handleKeyDown}
-            /> */}
-
-
-
-            {/* <Row justify="space-between" alignItems="center">
-
-
-              <Input
-                icon='calendar alternate outline'
-                iconPosition='left'
-                width="45%"
-                type="date"
-                value={task_date}
-                onChange={(event) => {
-                  const newDate = event.target.value;
-                  const formattedDate = new Date(newDate).toISOString().split("T")[0];
-                  console.log("selected date", newDate);
-                  console.log("formated date", formattedDate);
-                  setTask_date(formattedDate)
-                }}
-              />
-              <Input icon={<Icon name='time' inverted left iconPosition='left' />}
-                width="45%"
-                type="time"
-                placeholder="Time"
-                id="time" step="1800" min="00:00" max="23:59"
-                name="time" value={task_time}
-                onChange={(event) => {
-                  const newTime = event.target.value;
-                  console.log(newTime);
-                  setTask_time(newTime);
-                }}
-              />
-            </Row> */}
-
-            {/* {console.log(users)} */}
-            {/* <Dropdown>
-              <Dropdown.Button flat>{selectedValue}</Dropdown.Button>
+              <Form.Field>
+              <label>Assign User</label>
+              <Dropdown >
+              <Dropdown.Button css= {{m:20, justifyContent:"center"}} flat>{selectedValue}</Dropdown.Button>
               <Dropdown.Menu aria-label="Single selection actions"
                 color="secondary"
                 disallowEmptySelection
@@ -263,10 +215,22 @@ const TodoList = () => {
                   </Dropdown.Item>
                 )}
               </Dropdown.Menu>
-            </Dropdown> */}
+            </Dropdown>
+            </Form.Field>
 
-            {/* {console.log("slected value",selectedValue)}
-            {console.log("uservalue value",UserSelected)} */}
+              <Button auto flat color="error" onClick={closeHandler}>
+                Cancel
+              </Button>
+
+              <Button floated="right" onClick={handleAddTodo} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
+                Save
+              </Button>
+
+            </Form>
+
+           {console.log("users",users)}
+            {console.log("slected value",selectedValue)}
+            {console.log("uservalue value",UserSelected)}
           </Modal.Body>
           <Modal.Footer>
 
@@ -276,7 +240,7 @@ const TodoList = () => {
 
         <Container text>
           <Segment.Group horizontal secondary >
-            <Segment secondary left>TASKS</Segment>
+            <Segment secondary left>TASKS ({todos.length})</Segment>
             <Segment Right textAlign='right'> <Popup inverted content='New Task'
               trigger={<Button basic icon='add' onClick={handler} />}
             />
@@ -290,6 +254,7 @@ const TodoList = () => {
               setLoading={setLoading}
               setTodos={setTodos}
               item={item}
+             
             />
           ))}
            </Container>
