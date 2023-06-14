@@ -122,13 +122,16 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
 
     })
       .then((res) => {
+        console.log("res of after set complete data:",res.data);
         notify("Updating");
         if (res.data.code === 400 || res.data.status === "error") {
           notify("Error occured while updating");
           console.log("Error occured while updating: ", res.data);
           throw (res);
         } else {
+          setCompleted(0);
           notify("Updated");
+          console.log("Reseted Complete Value:", completed);
 
         }
       })
@@ -210,8 +213,14 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
           <Header style={{ margin: 0 + 'px' }} size='tiny'>{formattedDate} at {formattedTime}</Header>
         </div>
         <div floated="right">
-          <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
-          <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
+          <Popup inverted content='Edit This Task' trigger={<Button size='mini' basic icon='pencil' onClick={handler} />} />
+          <Popup inverted content='Complete This Task' trigger={<Button size='mini' basic icon='check' onClick={() => {
+            console.log("complete value:", completed);
+            setCompleted(1);
+            console.log("after setcomplete value:", completed);
+             handleSetCompleted(item.id)
+            }}  />}
+              />
         </div>
 
 

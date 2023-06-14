@@ -42,32 +42,13 @@ const App = () => {
   
   return (
     <NextUIProvider theme={darkMode.value ? darkTheme : lightTheme}>
-      {user.length > 0 && user[0] !== undefined ? (
         <Layout>
           <Box css={{ px: "$24", mt: "$8", "@xsMax": { px: "$10" } }}>
             <TodoList/>
           </Box>
         </Layout>
-      ) : (
-        <Suspense
-          fallback={
-           <Box css={{
-            width:"100%",
-            height:"100vh",
-            display:"flex",
-            justifyContent:"center",
-            alignItems:"center"
-           }}>
-             <Loading
-              type="default"
-              loadingCss={{ $$loadingSize: "100px", $$loadingBorder: "10px" }}
-            />
-           </Box>
-          }
-        >
-          <Login />
-        </Suspense>
-      )}
+  
+          {/* <Login /> */}
     </NextUIProvider>
   );
 };
