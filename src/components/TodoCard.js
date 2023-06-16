@@ -1,30 +1,34 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Text,
-  Modal,
-  Dropdown
-} from "@nextui-org/react";
 import { toast } from "react-toastify";
 import { DeleteTodo, GetTodos, UpdateTodo, TeamApi } from "../api/http/todosRequest";
 
-import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, List, Image, } from 'semantic-ui-react'
+import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, List, Image, TransitionablePortal, Modal, Dropdown } from 'semantic-ui-react'
 
 const TodoCard = ({ item, setTodos, setLoading, }) => {
 
   const [task_msg, setTask_msg] = useState(item.task_msg);
   const [task_date, setTask_date] = useState(item.task_date);
-  const [completed, setCompleted] = useState(0);
   const [users, setUsers] = useState([]);
-  const [UserSelected, setUserSelected] = useState("user");
+  
+  
 
+  const [UserSelected, setUserSelected] = useState("user");
+  
   const selectedValue = useMemo(
     () => Array.from(UserSelected), [UserSelected]
-  );
+    );
+ 
+    const [completed, setCompleted] = useState(0);
+    
+  //to check 
+  let taskcomplete = 0;
+  
 
   useEffect(() => {
     TeamApi().then((res) => {
+      console.log("userdata @ todocard:", res.data.results.data);
       setUsers(res.data.results.data);
-      // console.log("userdata @ todocard:", res.data.results.data);
+      // console.log(" users value:", users[0].id, users[0].name);
 
     }).catch((err) => {
       console.log(err);
@@ -33,8 +37,13 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
   }, []);
 
 
+  // dropdown 
+  const [value, setValue] = useState(item.assigned_user);
 
-
+  const handleChange = (e, { value }) => {
+    setValue(value);
+    console.log("user selected Value:", value)
+  };
 
   //  Date & Time Manipulation
 
@@ -88,50 +97,63 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
   };
 
 
+
   const notify = (proccess) => toast(proccess);
 
   const handleDeleteTodo = (id) => {
-    setLoading(true);
-    DeleteTodo(id)
-      .then((res) => {
-        closeHandler();
-        notify("Deleting")
-        GetTodos().then((res) => setTodos(res.data.results));
-        notify("Deleted");
-      })
-      .catch((err) => {
-        notify("Upss somethings went wrong")
-      })
-      .finally(() => {
+    var result = window.confirm("Are you sure you want to delete this Task");
+    if (result) {
+      setLoading(true);
+      DeleteTodo(id)
+        .then((res) => {
+          closeHandler();
+          notify("Deleting")
+          GetTodos().then((res) => setTodos(res.data.results));
+          notify("Deleted");
+        })
+        .catch((err) => {
+          notify("Upss somethings went wrong")
+        })
+        .finally(() => {
 
 
-      });
-    setLoading(false);
+        });
+      setLoading(false);
+    }
+    else {
+      closeHandler();
+    }
+
+
   };
 
 
   const handleSetCompleted = (id) => {
 
+
+    taskcomplete = 1;
+    console.log("task complete value:", taskcomplete);
     UpdateTodo(id, {
-      "assigned_user": item.assigned_user,
+      "assigned_user": value,
       "task_date": item.task_date,
       "task_time": item.task_time,
-      "is_completed": completed,
+      "is_completed": taskcomplete,
       "time_zone": item.time_zone,
       "task_msg": task_msg === "" ? item.task_msg : task_msg
 
     })
       .then((res) => {
-        console.log("res of after set complete data:",res.data);
+        console.log("res of after set complete data:", res.data);
         notify("Updating");
         if (res.data.code === 400 || res.data.status === "error") {
           notify("Error occured while updating");
           console.log("Error occured while updating: ", res.data);
           throw (res);
         } else {
-          setCompleted(0);
+          // setCompleted(0);
+          taskcomplete = 0;
           notify("Updated");
-          console.log("Reseted Complete Value:", completed);
+          console.log("Reseted Complete Value:", taskcomplete);
 
         }
       })
@@ -157,8 +179,8 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
       task_date: task_date === item.task_date ? item.task_date : task_date,
       task_time: timeInSeconds === item.task_time ? item.task_time : timeInSeconds,
       time_zone: timezoneOffsetInSeconds === item.time_zone ? item.time_zone : timezoneOffsetInSeconds,
-      is_completed: completed === item.is_completed ? item.is_completed : completed,
-      assigned_user: selectedValue[0] === item.assigned_user ? item.assigned_user : selectedValue[0],
+      is_completed: taskcomplete,
+      assigned_user: value === item.assigned_user ? item.assigned_user : value,
 
     };
 
@@ -188,64 +210,56 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
 
 
 
+  // user image 
+  const userimage = (user, idx) => {
+    if (item.assigned_user === user.id) {
+      return <Image src={user.icon} size='mini' rounded />
+    }
+  }
+
 
   return (
     <>
       {/* Task Card */}
 
+      <Segment padded key={item.id} style={{ display: "flex", width: "366px" }}>
+        <div style={{ marginRight: "12px" }}>
+          {users.map((user, idx) => (
+            userimage(user, idx)
+          ))}
+        </div>
 
-      {/* <Image avatar src='https://react.semantic-ui.com/images/avatar/small/rachel.png' /> */}
-      {/* <List.Header as='a'>{item.task_msg}</List.Header> */}
-      {/* <List.Item>
-      <List.Content>
-        <List.Description>
-        <Text h3>{item.task_msg}</Text>
-        <Text h5>{formattedDate} at {formattedTime}</Text>
-        <Popup inverted content='Edit This Task' trigger={<Button basic icon='pencil' onClick={handler} />} />
-        <Popup inverted content='Complete This Task' trigger={<Button basic icon='check' onClick={() => handleSetCompleted(item.id)} />} />
-        </List.Description>
-      </List.Content>
-    </List.Item> */}
-
-      <Segment padded key={item.id} style={{ display: "flex", }}>
         <div style={{ flex: "1 1 auto" }} >
-          <Header style={{ margin: 0 + 'px' }} size='medium'>{item.task_msg}</Header>
-          <Header style={{ margin: 0 + 'px' }} size='tiny'>{formattedDate} at {formattedTime}</Header>
+          <Header style={{ margin: "0px" }} size='small'>{item.task_msg}</Header>
+          <Header style={{ margin: "0px" }} size='tiny'>{formattedDate} at {formattedTime}</Header>
         </div>
         <div floated="right">
           <Popup inverted content='Edit This Task' trigger={<Button size='mini' basic icon='pencil' onClick={handler} />} />
           <Popup inverted content='Complete This Task' trigger={<Button size='mini' basic icon='check' onClick={() => {
-            console.log("complete value:", completed);
-            setCompleted(1);
-            console.log("after setcomplete value:", completed);
-             handleSetCompleted(item.id)
-            }}  />}
-              />
+            handleSetCompleted(item.id)
+          }} />}
+          />
         </div>
 
-
       </Segment>
+
       {/* <Text h5>Date,Time, Zone format to API</Text>
       <Text h5>{item.task_date}</Text>
       <Text h6>{item.task_time}</Text>
       <Text h6>{item.time_zone}</Text> */}
 
-
-
       {/* Update Modal */}
       <Modal
-        closeButton
-        blur
-        aria-labelledby="modal-title"
+        dimmer="blurring"
+        aria-labelledby="adding_task"
         open={visible}
         onClose={closeHandler}
+        style={{ width: "366px" }}
       >
         <Modal.Header>
-          <Text >
-            <h3>Update Task</h3>
-          </Text>
+          <h3>Update Task</h3>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Content>
           <Form>
             <Form.Field>
               <label>Task Description</label>
@@ -276,42 +290,36 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
             </Form.Group>
             <Form.Field>
               <label>Assign User</label>
-              <Dropdown >
-                <Dropdown.Button css={{ m: 20, justifyContent: "center" }} flat>{selectedValue}</Dropdown.Button>
-                <Dropdown.Menu aria-label="Single selection actions"
-                  color="secondary"
-                  disallowEmptySelection
-                  selectionMode="single"
-                  selectedKeys={UserSelected}
-                  onSelectionChange={setUserSelected}
-                  items={users}
-                >
-                  {(item) => (
-                    <Dropdown.Item key={item.id} >
-                      {item.name}
-                    </Dropdown.Item>
-                  )}
+              <Dropdown
+                // options={getoptions(users)}
+                selection
+                value={value}
+              >
+                <Dropdown.Menu>
+                  {users.map((option, idx) => (
+                    <Dropdown.Item key={idx} text={option.name} value={option.id} image={{ avatar: true, src: option.icon }} onClick={handleChange} />
+                  ))}
                 </Dropdown.Menu>
               </Dropdown>
+
             </Form.Field>
-
-            <Form.Group >
-              <Popup inverted content='Delete Task' trigger={<Button basic icon='trash alternate outline' onClick={() => handleDeleteTodo(item.id)} />} />
-
-              <Button auto flat color="error" onClick={closeHandler}>
-                Cancel
-              </Button>
-
-              <Button floated="right" onClick={() => handleUpdateTodo(item.id)} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
-                Save
-              </Button>
-            </Form.Group>
-
           </Form>
-        </Modal.Body>
-        <Modal.Footer>
-        </Modal.Footer>
+
+        </Modal.Content>
+
+        <Modal.Actions>
+          <Popup inverted content='Delete Task' trigger={<Button floated="left" basic icon='trash alternate outline' onClick={() => handleDeleteTodo(item.id)} />} />
+
+          <Button auto flat color="error" onClick={closeHandler}>
+            Cancel
+          </Button>
+
+          <Button floated="right" onClick={() => handleUpdateTodo(item.id)} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
+            Save
+          </Button>
+        </Modal.Actions>
       </Modal>
+
     </>
   );
 };

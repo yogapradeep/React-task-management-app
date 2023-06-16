@@ -1,0 +1,12 @@
+*{
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.ui.header{
+    font-family: 'Segoe UI', sans-serif;
+    
+}
+
+.ui.tiny.header {
+    font-size: 12px;
+}
