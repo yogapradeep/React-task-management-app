@@ -3,8 +3,8 @@ import {
   Loading,
   useTheme,
   Text,
-  Dropdown,
-  Modal,
+  // Dropdown,
+  // Modal,
   Row,
 } from "@nextui-org/react";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,28 +12,50 @@ import { Box } from "./Box";
 import TodoCard from "./TodoCard";
 import { GetTodos, AddTodo, TeamApi } from "../api/http/todosRequest";
 
-import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, Container, List } from 'semantic-ui-react'
+import { Icon, Header, Input, Divider, Button, Popup, Form, Segment, Container, List, TransitionablePortal, Modal, Dropdown } from 'semantic-ui-react'
 
 
 
 const TodoList = () => {
-  const { type, theme } = useTheme();
+
   const [todos, setTodos] = useState([]);
   const [task_msg, setTask_msg] = useState("Follow UP");
   const defaultcurrentDate = new Date().toISOString().split('T')[0];
   // console.log("default date value:", defaultcurrentDate);
 
-  const [task_date, setTask_date] = useState(defaultcurrentDate);
+  const [task_date, setTask_date] = useState("");
   const [task_time, setTask_time] = useState("");
   const [isLoading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
+
+
   const [UserSelected, setUserSelected] = useState("user");
 
   const selectedValue = useMemo(
     () => Array.from(UserSelected), [UserSelected]
   );
 
+  // dropdown 
+  const [value, setValue] = useState();
+
+  const handleChange = (e, { value }) => {
+    setValue(value);
+    console.log("user selected Value:", value)
+  };
+
+
+
   useEffect(() => {
+
+    GetTodos()
+      .then((res) => {
+        console.log("task data:", res.data);
+        setTodos(res.data.results);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     TeamApi().then((res) => {
       console.log("user data:", res.data);
       setUsers(res.data.results.data);
@@ -41,14 +63,6 @@ const TodoList = () => {
     }).catch((err) => {
       console.log(err);
     });
-
-    GetTodos()
-      .then((res) => {
-        setTodos(res.data.results);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
 
   }, []);
@@ -76,17 +90,24 @@ const TodoList = () => {
     setLoading(true);
     if (task_msg.trim().length > 2) {
 
-      //  Time Conversion HH:MM into SS
-      const [hours, minutes] = task_time.split(":");
-      const timeInSeconds = parseInt(hours) * 3600 + parseInt(minutes) * 60;
-      // console.log(timeInSeconds);
+      let timeInSeconds;
+      if (task_time) {
+
+        //  Time Conversion HH:MM into SS
+        const [hours, minutes] = task_time.split(":");
+        timeInSeconds = parseInt(hours) * 3600 + parseInt(minutes) * 60;
+        // console.log(timeInSeconds);
+      }
+      else {
+        timeInSeconds = " "
+      }
 
       // TimeZone Offset Value
       const currentDate = new Date();
       const timezoneOffsetInSeconds = Math.abs(currentDate.getTimezoneOffset() * 60);
       // console.log(timezoneOffsetInSeconds);
 
-      AddTodo({ assigned_user: selectedValue[0], task_date: task_date, task_time: timeInSeconds, time_zone: timezoneOffsetInSeconds, is_completed: 0, task_msg: task_msg })
+      AddTodo({ assigned_user: value, task_date: task_date, task_time: timeInSeconds, time_zone: timezoneOffsetInSeconds, is_completed: 0, task_msg: task_msg })
         .then((res) => {
           console.log("Response data while adding:", res.data);
           if (res.data.code === 400 || res.data.status === "error") {
@@ -105,27 +126,20 @@ const TodoList = () => {
               .finally(() => {
                 setLoading(false);
                 notify("Success");
-               
+
+
+                setTask_date("");
                 setTask_time("");
               });
-
-
           }
-
-
 
         })
         .catch((err) => notify("Upss somethings went wrong"))
         .finally(() => {
-
-
         })
     } else {
       notify("Todo content length min 3 characters")
     }
-
-
-
   };
 
 
@@ -154,31 +168,29 @@ const TodoList = () => {
         }
       >
 
-
         {/* adding Task Modal */}
         <Modal
           closeButton
-          blur
+
           aria-labelledby="adding_task"
           open={visible}
           onClose={closeHandler}
+          style={{ width: "366px" }}
         >
-
-
           <Modal.Header>
             <h3>Adding Task</h3>
           </Modal.Header>
 
-          <Modal.Body>
+          <Modal.Content>
             <Form>
               <Form.Field>
                 <label>Task Description</label>
-                <input value={task_msg} onChange={(e) => setTask_msg(e.target.value)}
+                <input defaultValue="Follow up" onChange={(e) => setTask_msg(e.target.value)}
                   onKeyDown={handleKeyDown} />
               </Form.Field>
 
               <Form.Group widths='equal'>
-                <Form.Input type="date" value={task_date} fluid label='Date' icon='calendar alternate outline' iconPosition='left'
+                <Form.Input type="date" defaultValue={defaultcurrentDate} label='Date' icon='calendar alternate outline' iconPosition='left'
                   onChange={(event) => {
                     const newDate = event.target.value;
                     const formattedDate = new Date(newDate).toISOString().split("T")[0];
@@ -188,7 +200,7 @@ const TodoList = () => {
                   }}
 
                 />
-                <Form.Input icon="clock outline" iconPosition='left' type="time" name="time" label='Time' placeholder='Time' fluid
+                <Form.Input icon="clock outline" iconPosition='left' type="time" name="time" label='Time' placeholder='Time' f
                   onChange={(event) => {
                     const newTime = event.target.value;
                     console.log(newTime);
@@ -197,71 +209,57 @@ const TodoList = () => {
                 />
               </Form.Group>
 
+
               <Form.Field>
-              <label>Assign User</label>
-              <Dropdown >
-              <Dropdown.Button css= {{m:20, justifyContent:"center"}} flat>{selectedValue}</Dropdown.Button>
-              <Dropdown.Menu aria-label="Single selection actions"
-                color="secondary"
-                disallowEmptySelection
-                selectionMode="single"
-                selectedKeys={UserSelected}
-                onSelectionChange={setUserSelected}
-                items={users}
-              >
-                {(item) => (
-                  <Dropdown.Item key={item.id} >
-                    {item.name}
-                  </Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-            </Form.Field>
-
-              <Button auto flat color="error" onClick={closeHandler}>
-                Cancel
-              </Button>
-
-              <Button floated="right" onClick={handleAddTodo} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
-                Save
-              </Button>
-
+                <label>Assign User</label>
+                <Dropdown
+                  // options={getoptions(users)}
+                  selection={true}
+                  value={value}
+                >
+                  <Dropdown.Menu>
+                    {users.map((option, idx) => (
+                      <Dropdown.Item key={idx} text={option.name} value={option.id} image={{ avatar: true, src: option.icon }} onClick={handleChange} />
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Form.Field>
             </Form>
 
-           {console.log("users",users)}
-            {console.log("slected value",selectedValue)}
-            {console.log("uservalue value",UserSelected)}
-          </Modal.Body>
-          <Modal.Footer>
+            {/* {console.log("users", users)}
+            {console.log("slected value", selectedValue)}
+            {console.log("uservalue value", UserSelected)} */}
+          </Modal.Content>
+          <Modal.Actions>
+            <Button basic onClick={closeHandler}>
+              Cancel
+            </Button>
 
-          </Modal.Footer>
+            <Button floated="right" onClick={handleAddTodo} color='teal' auto style={{ marginLeft: 40 + 'px' }}   >
+              Save
+            </Button>
+          </Modal.Actions>
         </Modal>
 
-
-        <Container text>
-          <Segment.Group horizontal secondary >
-            <Segment secondary left>TASKS ({todos.length})</Segment>
-            <Segment Right textAlign='right'> <Popup inverted content='New Task'
-              trigger={<Button basic icon='add' onClick={handler} />}
+        <Container text style={{ width: "366px", margin: "30px" }}>
+          <Segment secondary style={{ height: "37px", display: "flex", alignItems: "center", paddingRight: "0px" }}>
+            <p style={{ flex: "1 1 auto", margin: "0px", }}> Task({todos.length})</p>
+            <Popup inverted content='New Task'
+              trigger={<Button style={{ margin: "0" }} basic icon='add' onClick={handler} />}
             />
-            </Segment>
-          </Segment.Group>
+          </Segment>
 
-          {/* <List divided verticalAlign='middle'> */}
           <Container text>
-          {todos.map((item) => (
-            <TodoCard key={item.id}
-              setLoading={setLoading}
-              setTodos={setTodos}
-              item={item}
-             
-            />
-          ))}
-           </Container>
-           {/* </List> */}
+            {todos.map((item) => (
+              <TodoCard key={item.id}
+                setLoading={setLoading}
+                setTodos={setTodos}
+                item={item}
 
+              />
+            ))}
+          </Container>
         </Container>
-
 
         <ToastContainer
           position="bottom-right"
@@ -273,7 +271,7 @@ const TodoList = () => {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme={type === "dark" ? "dark" : "light"}
+
         />
       </Suspense>
     );
