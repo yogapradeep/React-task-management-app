@@ -230,8 +230,8 @@ const TodoCard = ({ item, setTodos, setLoading, }) => {
         </div>
 
         <div style={{ flex: "1 1 auto" }} >
-          <Header style={{ margin: "0px" }} size='small'>{item.task_msg}</Header>
-          <Header style={{ margin: "0px" }} size='tiny'>{formattedDate} at {formattedTime}</Header>
+          <h4 style={{ margin: "0px" }} size='small'>{item.task_msg}</h4>
+          <p style={{ margin: "0px" }} size='tiny'>{formattedDate} at {formattedTime}</p>
         </div>
         <div floated="right">
           <Popup inverted content='Edit This Task' trigger={<Button size='mini' basic icon='pencil' onClick={handler} />} />
